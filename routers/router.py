@@ -24,7 +24,7 @@ async def prechat(age: int, work: str, interest: str):
         "code": 200,
         "data": {
             "id": id,
-            "msg": "你好。"
+            "message": "你好。"
         }
     })
 
