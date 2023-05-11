@@ -1,23 +1,9 @@
 import random
-
-from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-import requests as r
-import main
+from fastapi import APIRouter
+import ChatPool
 
 router = APIRouter()
-
-
-
-url = "https://api.openai.com/v1/chat/completions"
-
-
-def get_headers():
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": main.apikeys[random.randint(0, len(main.apikeys) - 1)]
-    }
-    return headers
 
 
 def get_user():
@@ -31,19 +17,25 @@ def get_user():
 
 @router.get("/chat/prechat")
 async def prechat(age: int, work: str, interest: str):
-    user = get_user()
-    prechat_content = f"""我是{age}岁的{work}，我喜欢{interest}，想和你聊天，可以的话请回复我：“你好。”"""
-    data = {
-        "model": "gpt-3.5-turbo",
-        "messages": [{"role": "user", "content": prechat_content}],
-        "user": get_user()
-    }
-    response = r.post(url, json=data, headers=get_headers())
-    if "content" not in response.text:
-        return JSONResponse(response.text)
-    else:
-        return JSONResponse({
-            "code": 400,
-            "message": "Unknown Error!"
-        })
+    id = get_user()
+    feature = f"""我是{age}岁的{work}，我喜欢{interest}，想和你聊天，可以的话请回复我：“你好。”。"""
+    ChatPool.prechat(id, feature)
+    return JSONResponse({
+        "code": 200,
+        "data": {
+            "id": id,
+            "msg": "你好。"
+        }
+    })
 
+
+@router.get("/chat/chat")
+async def chat(id: str, msg: str):
+    answer = ChatPool.chat(id, msg)
+    return JSONResponse({
+        "code": 200,
+        "data": {
+            "id": id,
+            "message": answer
+        }
+    })
